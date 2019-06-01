@@ -24,9 +24,9 @@
 
 function inspector_add_menu() 
 {
-	add_submenu_page("options-general.php", "Inspector", "Inspector", "manage_options", "inspector", "inspector_page");
+	add_submenu_page('options-general.php', 'Inspector', 'Inspector', 'manage_options', 'inspector', 'inspector_page');
 }
-add_action("admin_menu", "inspector_add_menu");
+add_action('admin_menu', 'inspector_add_menu');
 
 function inspector_page()
 {
@@ -38,8 +38,8 @@ function inspector_page()
  
 	<form method="post" action="options.php">
 		<?php
-			settings_fields("inspector_api_key");
-			do_settings_sections("inspector");
+			settings_fields('inspector_api_key');
+			do_settings_sections('inspector');
 			submit_button();
 		?>
 	 </form>
@@ -49,16 +49,17 @@ function inspector_page()
 }
  
 function inspector_settings() {
-	add_settings_section("settings", "", null, "inspector");
-	add_settings_field("inspector_api_key", "API KEY - Create a new project in your Inspector dashboard to obtain a valid Key.", "inspector_key_options", "inspector", "settings");
-	register_setting("settings", "inspector_api_key");
+	add_settings_section('settings', '', null, 'inspector');
+	add_settings_field('inspector_api_key', 'API KEY <br/> Create a new project in your Inspector dashboard to obtain a valid Key.', 'inspector_key_options', 'inspector', 'settings');
+	register_setting('settings', 'inspector_api_key');
 	
-	add_settings_section("settings", "", null, "inspector");
-	add_settings_field("inspector_enable", "Enable/disable monitoring.", "inspector_enable_options", "inspector", "settings");
-	register_setting("settings", "inspector_enable");
+	add_settings_section('settings', '', null, 'inspector');
+	add_settings_field('inspector_enable', 'Activate <br/> Enable/disable monitoring.', 'inspector_enable_options', 'inspector', 'settings');
+	register_setting('settings', 'inspector_enable');
 }
-add_action("admin_init", "inspector_settings");
- 
+add_action('admin_init', 'inspector_settings');
+
+
 function inspector_key_options() {
 ?>
 <div class="postbox" style="padding: 20px;">
@@ -67,7 +68,7 @@ function inspector_key_options() {
 		type="text" 
 		name="inspector_api_key"
 		value="<?=stripslashes_deep(esc_attr(get_option('inspector_api_key'))); ?>"
-		placehoder="Inspector api key"
+		placeholder="Paste here your project api key..."
 	/>
 	<br/><br/>
 	<a href="https://app.inspector.dev/home" target="_blank">
@@ -76,6 +77,7 @@ function inspector_key_options() {
 </div>
 <?php
 }
+
 
 function inspector_enable_options() {
 ?>
