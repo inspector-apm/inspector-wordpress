@@ -22,6 +22,7 @@
  */
 
 use Inspector\Configuration;
+use Inspector\Inspector;
 
 class Inspector_Wordpress
 {
@@ -29,22 +30,19 @@ class Inspector_Wordpress
     private static $PACKAGED_AUTOLOADER = 'inspector-php/autoload.php';
 
     /**
-     * @var string
-     */
-    private $apiKey;
-
-    /**
-     * @var bool
-     */
-    private $enable = false;
-
-    /**
      * @var Configuration
      */
     private $configuration;
 
     /**
+     * @var Inspector
+     */
+    private $inspector;
+
+    /**
      * Inspector_Wordpress constructor.
+     *
+     * @throws \Inspector\Exceptions\InspectorException
      */
     public function __construct()
     {
@@ -53,70 +51,115 @@ class Inspector_Wordpress
 
     /**
      * Activate Inspector monitoring as soon as possible.
+     *
+     * @throws \Inspector\Exceptions\InspectorException
      */
     private function activateInspector()
     {
-        $is_load_success = $this->requireBugsnagPhp();
+        $is_load_success = $this->requireInspectorPackage();
 
         if (!$is_load_success) {
-            error_log("Bugsnag Error: Couldn't activate Bugsnag Error Monitoring due to missing Bugsnag library!");
+            error_log("Inspector Error: Couldn't activate Inspector Monitoring due to missing Inspector library!");
             return;
         }
 
-        // Load inspector settings
-        $this->apiKey = get_option( 'inspector_api_key' );
-        $this->enable = get_option( 'inspector_enable' );
-
-        $this->init();
+        $this->initAgent();
     }
 
-    private function init() {
-        if(!empty($this->apiKey)) {
-            $this->configuration = new Configuration($this->apiKey);
-
-            $this->client->setReleaseStage($this->releaseStage())
-                ->setErrorReportingLevel($this->errorReportingLevel())
-                ->setFilters($this->filterFields());
-
-            $this->client->setNotifier(self::$NOTIFIER);
-
-            // If handlers are not set, errors are still going to be reported
-            // to bugsnag, difference is execution will not stop.
-            //
-            // Can be useful to see inline errors and traces with xdebug too.
-            $set_error_and_exception_handlers = apply_filters('bugsnag_set_error_and_exception_handlers', true);
-            if ($set_error_and_exception_handlers === true) {
-                // Hook up automatic error handling
-                set_error_handler(array($this->client, "errorHandler"));
-                set_exception_handler(array($this->client, "exceptionHandler"));
-            }
+    /**
+     * @throws \Inspector\Exceptions\InspectorException
+     */
+    private function initAgent()
+    {
+        if(empty(get_option( 'inspector_api_key' ))){
+            return;
         }
+
+        $this->configuration = new Configuration(get_option( 'inspector_api_key' ));
+        $this->configuration->setEnabled(get_option( 'inspector_enable' ));
+
+        $this->inspector = new Inspector($this->configuration);
+
+        // If handlers are not set, errors are still going to be reported
+        // to bugsnag, difference is execution will not stop.
+        //
+        // Can be useful to see inline errors and traces with xdebug too.
+        /*$set_error_and_exception_handlers = apply_filters('bugsnag_set_error_and_exception_handlers', true);
+        if ($set_error_and_exception_handlers === true) {
+            // Hook up automatic error handling
+            set_error_handler(array($this->client, "errorHandler"));
+            set_exception_handler(array($this->client, "exceptionHandler"));
+        }*/
     }
 
+    /**
+     * Include all inspector package files.
+     *
+     * @return bool
+     */
     private function requireInspectorPackage()
     {
-        // Bugsnag-php was already loaded by some 3rd-party code, don't need to load it again.
-        if (class_exists('Bugsnag_Client')) {
+        // inspector-php was already loaded by some 3rd-party code, don't need to load it again.
+        if (class_exists('Inspector')) {
             return true;
         }
 
         // Try loading bugsnag-php with composer autoloader.
-        $composer_autoloader_path = $this->relativePath(self::$COMPOSER_AUTOLOADER);
-        $composer_autoloader_path_filtered = apply_filters('bugsnag_composer_autoloader_path', $composer_autoloader_path);
-        if (file_exists($composer_autoloader_path_filtered)) {
-            require_once $composer_autoloader_path_filtered;
+        $composer_autoloader_path = dirname(__FILE__) . '/' . self::$COMPOSER_AUTOLOADER;
+        if (file_exists($composer_autoloader_path)) {
+            require_once $composer_autoloader_path;
             return true;
         }
 
         // Try loading bugsnag-php from packaged autoloader.
-        $packaged_autoloader_path = $this->relativePath(self::$PACKAGED_AUTOLOADER);
-        $packaged_autoloader_path_filtered = apply_filters('bugsnag_packaged_autoloader_path', $packaged_autoloader_path);
-        if (file_exists($packaged_autoloader_path_filtered)) {
-            require_once $packaged_autoloader_path_filtered;
+        $packaged_autoloader_path = dirname(__FILE__) . '/' . self::$PACKAGED_AUTOLOADER;
+        if (file_exists($packaged_autoloader_path)) {
+            require_once $packaged_autoloader_path;
             return true;
         }
 
         return false;
+    }
+
+    public function registerHooks()
+    {
+        $spans = [];
+
+        apply_filters('setup_theme', function () use ($spans) {
+            if ( 'cli' === php_sapi_name() ) {
+                $t_name = implode(' ', $_SERVER['argv']);
+            } else {
+                $t_name = strtoupper($_SERVER['REQUEST_METHOD'] . ' /' . trim($_SERVER['REQUEST_URI'], '/'));
+            }
+
+            $this->inspector->startTransaction($t_name);
+
+            $spans['theme'] = $this->inspector->startSpan('Theme');
+        });
+
+        apply_filters('after_setup_theme', function () use($spans) {
+            if(array_key_exists('theme', $spans)){
+                $spans['theme']->end();
+            }
+        });
+
+        apply_filters('shutdown', function () {
+            foreach ( $GLOBALS['wpdb'] as $name => $db ) {
+                if ( is_a( $db, 'wpdb' ) ) {
+                    $this->processQuery( $name, $db );
+                }
+            }
+        });
+    }
+
+    protected function processQuery($name, $db)
+    {
+        foreach ( (array) $db->queries as $query ) {
+            $span = $this->inspector->startSpan($name);
+            $span->getContext()->getDb()->setSql($query[0]);
+            $span->getContext()->getDb()->setType('mysql');
+            $span->end($query[1]);
+        }
     }
 }
 
