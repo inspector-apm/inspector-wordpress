@@ -163,11 +163,17 @@ class Inspector_Wordpress
     }
 }
 
+add_action('admin_menu', 'inspector_add_menu');
 function inspector_add_menu() 
 {
-	add_submenu_page('options-general.php', 'Inspector', 'Inspector', 'manage_options', 'inspector', 'inspector_page');
+	add_menu_page('Inspector', 'Inspector Settings', 'administrator', __FILE__, 'inspector_page', plugins_url('/assets/images/menu_icon.png', __FILE__));
+    add_action('admin_init', 'register_inspector_settings');
 }
-add_action('admin_menu', 'inspector_add_menu');
+
+function register_inspector_settings() {
+    register_setting('inspector-settings', 'inspector_api_key');
+    register_setting('inspector-settings', 'inspector_enable');
+}
 
 
 function inspector_page()
@@ -179,57 +185,48 @@ function inspector_page()
 	<br/><br/>
  
 	<form method="post" action="options.php">
-		<?php
-			settings_fields('inspector_api_key', 'inspector_enable');
-			do_settings_sections('inspector');
-			submit_button();
-		?>
+        <?php settings_fields( 'inspector-settings' ); ?>
+        <?php do_settings_sections( 'inspector-settings' ); ?>
+        <table class="form-table">
+            <tr valign="top">
+                <th scope="row">
+                    API KEY <br/>
+                    Create a new project in your Inspector dashboard to obtain a valid Key.
+                </th>
+                <td>
+                    <input
+                            style="width: 100%;"
+                            type="text"
+                            name="inspector_api_key"
+                            value="<?=esc_attr(get_option('inspector_api_key')); ?>"
+                            placeholder="Paste here your project api key..."
+                    />
+                    <br/><br/>
+                    <a href="https://app.inspector.dev/home" target="_blank">
+                        Go to Inspector dashboard.
+                    </a>
+                </td>
+            </tr>
+
+            <tr valign="top">
+                <th scope="row">
+                    Activate <br/>
+                    Enable/disable monitoring.
+                </th>
+                <td>
+                    <input
+                            type="checkbox"
+                            name="inspector_enable"
+                            value="<?=esc_attr(get_option('inspector_enable')); ?>"
+                    />
+                    Check this flag to activate monitoring
+                </td>
+            </tr>
+        </table>
+
+        <?php submit_button(); ?>
 	 </form>
 </div>
  
-<?php
-}
- 
-function inspector_settings() {
-	add_settings_section('settings', '', null, 'inspector');
-	add_settings_field('inspector_api_key', 'API KEY <br/> Create a new project in your Inspector dashboard to obtain a valid Key.', 'inspector_key_options', 'inspector', 'settings');
-	register_setting('settings', 'inspector_api_key');
-	
-	add_settings_section('settings', '', null, 'inspector');
-	add_settings_field('inspector_enable', 'Activate <br/> Enable/disable monitoring.', 'inspector_enable_options', 'inspector', 'settings');
-	register_setting('settings', 'inspector_enable');
-}
-add_action('admin_init', 'inspector_settings');
-
-
-function inspector_key_options() {
-?>
-<div class="postbox" style="padding: 20px;">
-	<input 
-		style="width: 80%;"
-		type="text" 
-		name="inspector_api_key"
-		value="<?=stripslashes_deep(esc_attr(get_option('inspector_api_key'))); ?>"
-		placeholder="Paste here your project api key..."
-	/>
-	<br/><br/>
-	<a href="https://app.inspector.dev/home" target="_blank">
-		Go to Inspector dashboard.
-	</a>
-</div>
-<?php
-}
-
-
-function inspector_enable_options() {
-?>
-<div class="postbox" style="padding: 20px;">
-	<input 
-		type="checkbox" 
-		name="inspector_enable"
-		value="<?=stripslashes_deep(esc_attr(get_option('inspector_enable'))); ?>"
-	/>
-	Check this flag to activate monitoring
-</div>
 <?php
 }
