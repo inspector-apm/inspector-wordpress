@@ -57,7 +57,7 @@ class Request extends AbstractContext
      */
     public function __construct()
     {
-        if(PHP_SAPI === 'cli'){
+        if (PHP_SAPI === 'cli') {
             return;
         }
 
@@ -65,7 +65,9 @@ class Request extends AbstractContext
         $this->socket = new Socket();
         $this->method = $_SERVER['REQUEST_METHOD'] ?? 'cli';
         $this->httpVersion = substr($_SERVER['SERVER_PROTOCOL'], strpos($_SERVER['SERVER_PROTOCOL'], '/'));
-        $this->headers = apache_request_headers();
+        if (function_exists('apache_request_headers')) {
+            $this->headers = apache_request_headers();
+        }
         $this->cookies = $_COOKIE;
     }
 
@@ -160,7 +162,7 @@ class Request extends AbstractContext
 
     public function getBody()
     {
-        if(!empty($this->postParams)){
+        if (!empty($this->postParams)) {
             return $this->postParams;
         } elseif (isset($this->rawBody)) {
             return $this->rawBody;
