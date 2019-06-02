@@ -9,7 +9,7 @@
  * @copyright 2019 Aventure s.r.l. All rights reserved.
  *
  *            @wordpress-plugin
- *            Plugin Name: Inspector
+ *            Plugin Name: Inspector for Wordpress
  *            Plugin URI: https://www.inspector.dev/
  *            Description: Real time monitoring for Web Agency and Freelance. Automate error detection so you can spend time on develop new functionality no needs to check manually that your website and applications works.
  *            Version: 1.0
