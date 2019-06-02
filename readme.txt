@@ -17,12 +17,13 @@ Real time monitoring for Web Agency and Freelance. It automate applications moni
 1. Unpack the `download-package`.
 2. Upload the file to the `/wp-content/plugins/` directory.
 3. Activate the plugin through the `Plugins` menu in WordPress.
-4. Done and Ready.
+4. Insert your project api key.
+5. Done and Ready.
  
 == Frequently Asked Questions ==
  
-= How to add FAQ question =
-* just add your FAQ questions here
+= Can I use Inspector for free? =
+* Yes you do. Inspector provide a complete free account for small needs.
  
 == Screenshots ==
 1. Events Timeline for every web request.
@@ -30,4 +31,4 @@ Real time monitoring for Web Agency and Freelance. It automate applications moni
 == Changelog ==
  
 = 1.0 =
-* Initial release
+* Stable release
