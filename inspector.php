@@ -47,8 +47,6 @@ class Inspector_Wordpress
 
     /**
      * Inspector_Wordpress constructor.
-     *
-     * @throws \Inspector\Exceptions\InspectorException
      */
     public function __construct()
     {
@@ -117,9 +115,9 @@ class Inspector_Wordpress
 
     private function registerHooks()
     {
-        add_action('setup_theme', array($this, 'startTransaction'));
+        /*add_action('setup_theme', array($this, 'startTransaction'));
         add_action('after_setup_theme', array($this, 'endThemeSpan'));
-        add_action('shutdown', array($this, 'processQueries'));
+        add_action('shutdown', array($this, 'processQueries'));*/
     }
 
     public function startTransaction()
@@ -174,6 +172,6 @@ function inspector_page(){
 
 try {
     $inspector = new Inspector_Wordpress();
-} catch (Exception $exception) {
+} catch (\Exception $exception) {
     error_log('Inspector Error ' . $exception->getMessage());
 }
