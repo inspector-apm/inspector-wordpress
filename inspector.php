@@ -217,7 +217,8 @@ function inspector_page()
                     <input
                             type="checkbox"
                             name="inspector_enable"
-                            value="<?=esc_attr(get_option('inspector_enable')); ?>"
+                            value="1"
+                        <?php if(esc_attr(get_option('inspector_enable'))) echo 'checked' ?>
                     />
                     Check this flag to activate monitoring
                 </td>
