@@ -65,7 +65,7 @@ class Request extends AbstractContext
         $this->socket = new Socket();
         $this->method = $_SERVER['REQUEST_METHOD'] ?? 'cli';
         $this->httpVersion = substr($_SERVER['SERVER_PROTOCOL'], strpos($_SERVER['SERVER_PROTOCOL'], '/'));
-        $this->headers = getallheaders();
+        $this->headers = apache_request_headers();
         $this->cookies = $_COOKIE;
     }
 
