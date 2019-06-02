@@ -22,6 +22,7 @@
  */
 
 use Inspector\Configuration;
+use Inspector\Exceptions\InspectorException;
 use Inspector\Inspector;
 
 class Inspector_Wordpress
@@ -47,6 +48,7 @@ class Inspector_Wordpress
     public function __construct()
     {
         if ($this->requireInspectorPackage()) {
+            error_log('Init Inspector Agent');
             $this->initAgent();
         } else {
             error_log("Inspector Error: Couldn't activate Inspector Monitoring due to missing Inspector library!");
@@ -54,20 +56,20 @@ class Inspector_Wordpress
     }
 
     /**
-     * @throws \Inspector\Exceptions\InspectorException
+     * Initialize Agent.
      */
     private function initAgent()
     {
-        if(empty(get_option( 'inspector_api_key' ))){
+        try {
+            $this->configuration = new Configuration(get_option( 'inspector_api_key' ));
+            $this->configuration->setEnabled(get_option( 'inspector_enable' ));
+
+            $this->inspector = new Inspector($this->configuration);
+            $this->registerHooks();
+            error_log('Inspector activated.');
+        } catch (InspectorException $exception) {
             error_log('Inspector can not be activated. API KEY seems to be empty.');
-            return;
         }
-
-        $this->configuration = new Configuration(get_option( 'inspector_api_key' ));
-        $this->configuration->setEnabled(get_option( 'inspector_enable' ));
-
-        $this->inspector = new Inspector($this->configuration);
-        $this->registerHooks();
 
         // If handlers are not set, errors are still going to be reported
         // to bugsnag, difference is execution will not stop.
