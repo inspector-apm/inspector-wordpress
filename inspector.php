@@ -64,7 +64,13 @@ class Inspector_Wordpress
     {
         try {
             $this->configuration = new Configuration(get_option( 'inspector_api_key' ));
+
             $this->configuration->setEnabled(get_option( 'inspector_enable' ));
+
+            // Stop monitoring on admin panel
+            if(is_admin()){
+                $this->configuration->setEnabled(false);
+            }
 
             $this->inspector = new Inspector($this->configuration);
             $this->registerHooks();
@@ -125,7 +131,7 @@ class Inspector_Wordpress
         if ( 'cli' === php_sapi_name() ) {
             $t_name = implode(' ', $_SERVER['argv']);
         } else {
-            $t_name = strtoupper($_SERVER['REQUEST_METHOD'] . ' /' . trim($_SERVER['REQUEST_URI'], '/'));
+            $t_name = $this->getTransactionNameFromRequest();
         }
 
         $this->inspector->startTransaction($t_name);
@@ -156,6 +162,11 @@ class Inspector_Wordpress
                 }
             }
         }
+    }
+
+    protected function getTransactionNameFromRequest()
+    {
+        return strtoupper($_SERVER['REQUEST_METHOD']) . ' ' . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     }
 }
 
