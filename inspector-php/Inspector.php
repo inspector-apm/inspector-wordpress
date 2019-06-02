@@ -8,7 +8,6 @@ use Inspector\Contracts\TransportInterface;
 use Inspector\Models\Error;
 use Inspector\Models\Span;
 use Inspector\Models\Transaction;
-use Inspector\Transport\AsyncTransport;
 use Inspector\Transport\CurlTransport;
 
 class Inspector
