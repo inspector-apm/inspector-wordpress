@@ -195,7 +195,7 @@ function inspector_page()
                 </th>
                 <td>
                     <input
-                            style="width: 100%;"
+                            style="width: 80%;"
                             type="text"
                             name="inspector_api_key"
                             value="<?=esc_attr(get_option('inspector_api_key')); ?>"
