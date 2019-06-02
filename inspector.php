@@ -46,24 +46,11 @@ class Inspector_Wordpress
      */
     public function __construct()
     {
-        $this->activateInspector();
-    }
-
-    /**
-     * Activate Inspector monitoring as soon as possible.
-     *
-     * @throws \Inspector\Exceptions\InspectorException
-     */
-    private function activateInspector()
-    {
-        $is_load_success = $this->requireInspectorPackage();
-
-        if (!$is_load_success) {
+        if ($this->requireInspectorPackage()) {
+            $this->initAgent();
+        } else {
             error_log("Inspector Error: Couldn't activate Inspector Monitoring due to missing Inspector library!");
-            return;
         }
-
-        $this->initAgent();
     }
 
     /**
@@ -79,6 +66,7 @@ class Inspector_Wordpress
         $this->configuration->setEnabled(get_option( 'inspector_enable' ));
 
         $this->inspector = new Inspector($this->configuration);
+        $this->registerHooks();
 
         // If handlers are not set, errors are still going to be reported
         // to bugsnag, difference is execution will not stop.
@@ -121,7 +109,7 @@ class Inspector_Wordpress
         return false;
     }
 
-    public function registerHooks()
+    protected function registerHooks()
     {
         $spans = [];
 
@@ -176,8 +164,7 @@ function register_inspector_settings() {
 }
 
 
-function inspector_page()
-{
+function inspector_page(){
 ?>
 <div class="wrap">
 	<img src="<?=plugins_url( '/assets/images/logo-horizontal.png', __FILE__ ) ?>" style="width: 200px;"/>
