@@ -115,8 +115,8 @@ class Inspector_Wordpress
 
     private function registerHooks()
     {
-        /*add_action('setup_theme', array($this, 'startTransaction'));
-        add_action('after_setup_theme', array($this, 'endThemeSpan'));
+        add_action('setup_theme', array($this, 'startTransaction'));
+        /*add_action('after_setup_theme', array($this, 'endThemeSpan'));
         add_action('shutdown', array($this, 'processQueries'));*/
     }
 
@@ -129,7 +129,7 @@ class Inspector_Wordpress
         }
 
         $this->inspector->startTransaction($t_name);
-        $this->spans['theme'] = $this->inspector->startSpan('Theme');
+        //$this->spans['theme'] = $this->inspector->startSpan('Theme');
     }
 
     public function endThemeSpan()
