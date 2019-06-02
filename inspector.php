@@ -59,6 +59,7 @@ class Inspector_Wordpress
     private function initAgent()
     {
         if(empty(get_option( 'inspector_api_key' ))){
+            error_log('Inspector can not be activated. API KEY seems to be empty.');
             return;
         }
 
@@ -154,7 +155,7 @@ class Inspector_Wordpress
 add_action('admin_menu', 'inspector_add_menu');
 function inspector_add_menu() 
 {
-	add_menu_page('Inspector', 'Inspector Settings', 'administrator', __FILE__, 'inspector_page', plugins_url('/assets/images/menu_icon_colored.png', __FILE__));
+	add_menu_page('Inspector', 'Inspector', 'administrator', __FILE__, 'inspector_page', plugins_url('/assets/images/menu_icon_colored.png', __FILE__));
     add_action('admin_init', 'register_inspector_settings');
 }
 
