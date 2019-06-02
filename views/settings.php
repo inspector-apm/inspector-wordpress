@@ -1,6 +1,6 @@
 <div class="wrap">
     <a href="https://www.inspector.dev" target="_blank">
-        <img src="<?=plugins_url( '/assets/images/logo-horizontal.png', __FILE__ ) ?>" style="width: 200px;"/>
+        <img src="<?=plugins_url( '../assets/images/logo-horizontal.png', __FILE__ ) ?>" style="width: 200px;"/>
     </a>
 
     <br/><br/>

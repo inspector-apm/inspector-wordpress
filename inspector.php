@@ -114,7 +114,7 @@ class Inspector_Wordpress
     {
         $spans = [];
 
-        apply_filters('setup_theme', function () use ($spans) {
+        add_action('setup_theme', function () use ($spans) {
             if ( 'cli' === php_sapi_name() ) {
                 $t_name = implode(' ', $_SERVER['argv']);
             } else {
@@ -126,13 +126,13 @@ class Inspector_Wordpress
             $spans['theme'] = $this->inspector->startSpan('Theme');
         });
 
-        apply_filters('after_setup_theme', function () use($spans) {
+        add_action('after_setup_theme', function () use($spans) {
             if(array_key_exists('theme', $spans)){
                 $spans['theme']->end();
             }
         });
 
-        apply_filters('shutdown', function () {
+        add_action('shutdown', function () {
             foreach ( $GLOBALS['wpdb'] as $name => $db ) {
                 if ( is_a( $db, 'wpdb' ) ) {
                     $this->processQuery( $name, $db );
