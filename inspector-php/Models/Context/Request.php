@@ -57,7 +57,7 @@ class Request extends AbstractContext
      */
     public function __construct()
     {
-        if (PHP_SAPI === 'cli') {
+        if(PHP_SAPI === 'cli'){
             return;
         }
 
@@ -162,7 +162,7 @@ class Request extends AbstractContext
 
     public function getBody()
     {
-        if (!empty($this->postParams)) {
+        if(!empty($this->postParams)){
             return $this->postParams;
         } elseif (isset($this->rawBody)) {
             return $this->rawBody;

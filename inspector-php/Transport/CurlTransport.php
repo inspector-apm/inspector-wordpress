@@ -62,7 +62,6 @@ class CurlTransport extends AbstractApiTransport
         // 30 seconds max.
         curl_setopt($handle, CURLOPT_TIMEOUT, 10);
 
-        curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, FALSE);
         curl_setopt($handle, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
         curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
