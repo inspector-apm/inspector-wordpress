@@ -42,14 +42,7 @@ class Inspector
      */
     public function __construct(Configuration $configuration)
     {
-        switch ($configuration->getTransport()) {
-            case 'async':
-                $this->transport = new AsyncTransport($configuration);
-                break;
-            default:
-                $this->transport = new CurlTransport($configuration);
-        }
-
+        $this->transport = new CurlTransport($configuration);
         $this->configuration = $configuration;
         register_shutdown_function(array($this, 'flush'));
     }
