@@ -231,3 +231,5 @@ function inspector_page()
  
 <?php
 }
+
+$inspector = new Inspector_Wordpress();
