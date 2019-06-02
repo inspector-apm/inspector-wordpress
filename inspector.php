@@ -41,6 +41,11 @@ class Inspector_Wordpress
     private $inspector;
 
     /**
+     * @var array
+     */
+    private $spans = [];
+
+    /**
      * Inspector_Wordpress constructor.
      *
      * @throws \Inspector\Exceptions\InspectorException
@@ -110,44 +115,43 @@ class Inspector_Wordpress
         return false;
     }
 
-    protected function registerHooks()
+    private function registerHooks()
     {
-        $spans = [];
-
-        add_action('setup_theme', function () use ($spans) {
-            if ( 'cli' === php_sapi_name() ) {
-                $t_name = implode(' ', $_SERVER['argv']);
-            } else {
-                $t_name = strtoupper($_SERVER['REQUEST_METHOD'] . ' /' . trim($_SERVER['REQUEST_URI'], '/'));
-            }
-
-            $this->inspector->startTransaction($t_name);
-
-            $spans['theme'] = $this->inspector->startSpan('Theme');
-        });
-
-        add_action('after_setup_theme', function () use($spans) {
-            if(array_key_exists('theme', $spans)){
-                $spans['theme']->end();
-            }
-        });
-
-        add_action('shutdown', function () {
-            foreach ( $GLOBALS['wpdb'] as $name => $db ) {
-                if ( is_a( $db, 'wpdb' ) ) {
-                    $this->processQuery( $name, $db );
-                }
-            }
-        });
+        add_action('setup_theme', array($this, 'startTransaction'));
+        add_action('after_setup_theme', array($this, 'endThemeSpan'));
+        add_action('shutdown', array($this, 'processQueries'));
     }
 
-    protected function processQuery($name, $db)
+    public function startTransaction()
     {
-        foreach ( (array) $db->queries as $query ) {
-            $span = $this->inspector->startSpan($name);
-            $span->getContext()->getDb()->setSql($query[0]);
-            $span->getContext()->getDb()->setType('mysql');
-            $span->end($query[1]);
+        if ( 'cli' === php_sapi_name() ) {
+            $t_name = implode(' ', $_SERVER['argv']);
+        } else {
+            $t_name = strtoupper($_SERVER['REQUEST_METHOD'] . ' /' . trim($_SERVER['REQUEST_URI'], '/'));
+        }
+
+        $this->inspector->startTransaction($t_name);
+        $this->spans['theme'] = $this->inspector->startSpan('Theme');
+    }
+
+    public function endThemeSpan()
+    {
+        if(array_key_exists('theme', $this->spans)){
+            $this->spans['theme']->end();
+        }
+    }
+
+    public function processQueries($name, $db)
+    {
+        foreach ( $GLOBALS['wpdb'] as $name => $db ) {
+            if ( is_a( $db, 'wpdb' ) ) {
+                foreach ( (array) $db->queries as $query ) {
+                    $span = $this->inspector->startSpan($name);
+                    $span->getContext()->getDb()->setSql($query[0]);
+                    $span->getContext()->getDb()->setType('mysql');
+                    $span->end($query[1]);
+                }
+            }
         }
     }
 }
@@ -168,4 +172,8 @@ function inspector_page(){
     require_once 'views/settings.php';
 }
 
-$inspector = new Inspector_Wordpress();
+try {
+    $inspector = new Inspector_Wordpress();
+} catch (Exception $exception) {
+    error_log('Inspector Error ' . $exception->getMessage());
+}
