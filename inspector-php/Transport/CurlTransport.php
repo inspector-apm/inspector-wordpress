@@ -45,16 +45,10 @@ class CurlTransport extends AbstractApiTransport
      */
     public function sendChunk($data)
     {
-        $headers = array();
-
-        foreach ($this->getApiHeaders() as $name => $value) {
-            $headers[$name] = $value;
-        }
-
         $response = wp_remote_post($this->config->getUrl(), [
             'timeout' => 10,
             'body' => $data,
-            'headers' => $headers,
+            'headers' => $this->getApiHeaders(),
         ]);
 
         $code = wp_remote_retrieve_response_code($response);
