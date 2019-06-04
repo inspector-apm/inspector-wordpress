@@ -6,7 +6,7 @@ namespace Inspector\Wordpress;
 
 class SpanCollection
 {
-    protected static $collection;
+    protected static $collection = [];
 
     public static function all()
     {
