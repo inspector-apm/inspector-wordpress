@@ -13,11 +13,6 @@ class FilterWrapper
     protected $inspector;
 
     /**
-     * @var array
-     */
-    protected $spans = [];
-
-    /**
      * @var string  This will be the hook we inject. Could either be an existing wordpress hook or alternative an
      *              custom hook created by the plugin/theme.
      */
@@ -42,27 +37,47 @@ class FilterWrapper
     /**
      * HookObject constructor.
      *
-     * @param string $hook_name
-     * @param string $callback_function
-     * @param int $priority
-     * @param int $accepted_args
+     * @param Inspector $inspector
      */
-    public function __construct( $hook_name, $callback_function, $priority, $accepted_args ) {
+    public function __construct( $inspector )
+    {
+        $this->inspector = $inspector;
+    }
+
+    /**
+     * Init wrapper with original filter signature.
+     *
+     * @param $hook_name
+     * @param $callback_function
+     * @param $priority
+     * @param $accepted_args
+     * @return FilterWrapper
+     */
+    public function init($hook_name, $callback_function, $priority, $accepted_args)
+    {
         $this->hook_name         = $hook_name;
         $this->priority          = $priority;
         $this->accepted_args     = $accepted_args;
         $this->callback_function = $callback_function;
 
+        return $this;
+    }
+
+    /**
+     * Execute wp filter inside inspector profiler.
+     */
+    public function run()
+    {
         /**
          * First we need to remove the existing hook, this will be replaced with an custom filter.
          */
-        if ( ! remove_action( $hook_name, $callback_function, $priority ) ) {
+        if ( ! remove_action( $this->hook_name, $this->callback_function, $this->priority ) ) {
             echo "FAILED TO REMOVE FUNCTION";
         } else {
             /**
              * Add thhe new callback filter. This will be used as a wrapper calling the origin callback.
              */
-            add_filter( $hook_name, array( $this, 'wrapper' ), $priority, $accepted_args );
+            add_filter( $this->hook_name, array( $this, 'wrapper' ), $this->priority, $this->accepted_args );
         }
     }
 

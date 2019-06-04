@@ -139,7 +139,9 @@ class Inspector_Wordpress
                         $callback_function = $callback_name;
                     }
 
-                    new FilterWrapper( $hook_name, $callback_function, $priority, $callback['accepted_args'] );
+                    (new FilterWrapper($this->inspector))
+                        ->init($hook_name, $callback_function, $priority, $callback['accepted_args'])
+                        ->run();
                 }
             }
         }
