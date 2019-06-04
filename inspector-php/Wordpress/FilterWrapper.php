@@ -146,18 +146,18 @@ class FilterWrapper
         if ( strpos( $stack['file'], 'themes' ) ) {
             // Theme functions
             $span = new Span('Theme', $this->inspector->currentTransaction());
-            $span->end($time);
+            $span->start()->end($time);
             SpanCollection::set('Theme', $span);
         } else if ( strpos( $stack['file'], 'plugins' ) ) {
             // Plugin functions
             $pluginName = Helper::get_plugin_name($stack['file']);
             $span = new Span($pluginName, $this->inspector->currentTransaction());
-            $span->end($time);
+            $span->start()->end($time);
             SpanCollection::set($pluginName, $span);
         } else {
             // Wordpress Core functions
             $span = new Span('WordPress Core', $this->inspector->currentTransaction());
-            $span->end($time);
+            $span->start()->end($time);
             SpanCollection::set('themes', $span);
         }
 
