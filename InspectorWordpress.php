@@ -3,9 +3,8 @@
 
 use Inspector\Configuration;
 use Inspector\Exceptions\InspectorException;
-use Inspector\Inspector;
 use Inspector\Wordpress\FilterWrapper;
-use Inspector\Wordpress\SpanCollection;
+use Inspector\Wordpress\InspectorWrapper;
 
 class InspectorWordpress
 {
@@ -18,7 +17,7 @@ class InspectorWordpress
     private $configuration;
 
     /**
-     * @var Inspector
+     * @var InspectorWrapper
      */
     private $inspector;
 
@@ -30,7 +29,6 @@ class InspectorWordpress
         if ($this->requireInspectorPackage()) {
             $this->initAgent();
             $this->startTransaction();
-            $this->registerHooks();
         } else {
             error_log("Inspector Error: Couldn't activate Inspector Monitoring due to missing Inspector library!");
         }
@@ -44,7 +42,7 @@ class InspectorWordpress
     private function requireInspectorPackage()
     {
         // inspector-php was already loaded by some 3rd-party code, don't need to load it again.
-        if (class_exists('Inspector')) {
+        if (class_exists('InspectorWrapper')) {
             return true;
         }
 
@@ -72,7 +70,6 @@ class InspectorWordpress
     {
         try {
             $this->configuration = new Configuration(get_option( 'inspector_api_key' ));
-
             $this->configuration->setEnabled(get_option( 'inspector_enable' ));
 
             // Stop monitoring on admin panel
@@ -80,7 +77,8 @@ class InspectorWordpress
                 $this->configuration->setEnabled(false);
             }
 
-            $this->inspector = new Inspector($this->configuration);
+            $this->inspector = new InspectorWrapper($this->configuration);
+            $this->registerHooks();
         } catch (InspectorException $exception) {
             error_log('Inspector can not be activated. API KEY seems to be empty.');
         }
@@ -97,16 +95,14 @@ class InspectorWordpress
         }*/
     }
 
-    private function registerHooks()
+    public function registerHooks()
     {
         /*add_action('setup_theme', array($this, 'startTransaction'));
         add_action('after_setup_theme', array($this, 'endThemeSpan'));
         add_action('shutdown', array($this, 'shutdown'));*/
 
-        add_action('shutdown', array($this, 'shutdown'));
-
         global $wp_filter;
-        foreach ( $wp_filter as $hook_name => $filter /* @var WP_Hook */ ) {
+        foreach ( $wp_filter as $hook_name => $filter  ) { // $filter = WP_Hook
             foreach ( $filter->callbacks as $priority => $callback_container ) {
                 foreach ( $callback_container as $callback_name => $callback ) {
 
@@ -116,9 +112,7 @@ class InspectorWordpress
                         $callback_function = $callback_name;
                     }
 
-                    (new FilterWrapper($this->inspector))
-                        ->init($hook_name, $callback_function, $priority, $callback['accepted_args'])
-                        ->run();
+                    new FilterWrapper($this->inspector, $hook_name, $callback_function, $priority, $callback['accepted_args']);
                 }
             }
         }
@@ -138,10 +132,5 @@ class InspectorWordpress
     protected function getTransactionNameFromRequest()
     {
         return strtoupper($_SERVER['REQUEST_METHOD']) . ' ' . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    }
-
-    public function shutdown()
-    {
-        $this->inspector->addEntry(SpanCollection::all());
     }
 }

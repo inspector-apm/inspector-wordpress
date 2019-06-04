@@ -1,4 +1,7 @@
 <?php
+
+use Inspector\Wordpress\FilterWrapper;
+
 /**
  * Real time monitoring for Web Agency and Freelance. Automate error detection so you can spend time on develop new functionality no needs to check manually that your website and applications works.
  *
@@ -21,11 +24,10 @@
  */
 
 // Make sure it's wordpress
-if ( !defined( 'ABSPATH') ) {
+/*if ( !defined( 'ABSPATH') ) {
     die('Forbidden');
-}
+}*/
 
-add_action('admin_menu', 'inspector_add_menu');
 function inspector_add_menu() 
 {
 	add_menu_page('Inspector', 'Inspector', 'administrator', __FILE__, 'inspector_page', plugins_url('/assets/images/menu_icon_colored.png', __FILE__));
@@ -41,9 +43,16 @@ function inspector_page(){
     require_once 'views/settings.php';
 }
 
-try {
+function inspector_profiler() {
     require_once 'InspectorWordpress.php';
-    $inspector = new InspectorWordpress();
-} catch (\Exception $exception) {
-    error_log('Inspector Error ' . $exception->getMessage());
+
+    add_action('admin_menu', 'inspector_add_menu');
+
+    try {
+        new InspectorWordpress();
+    } catch (\Exception $exception) {
+        error_log('Inspector Error ' . $exception->getMessage());
+    }
 }
+
+add_action( 'init', 'inspector_profiler' );

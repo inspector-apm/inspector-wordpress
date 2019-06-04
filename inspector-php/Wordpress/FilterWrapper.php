@@ -3,13 +3,12 @@
 namespace Inspector\Wordpress;
 
 
-use Inspector\Inspector;
 use Inspector\Models\Span;
 
 class FilterWrapper
 {
     /**
-     * @var Inspector
+     * @var InspectorWrapper
      */
     protected $inspector;
 
@@ -38,46 +37,31 @@ class FilterWrapper
     /**
      * HookObject constructor.
      *
-     * @param Inspector $inspector
-     */
-    public function __construct( $inspector )
-    {
-        $this->inspector = $inspector;
-    }
-
-    /**
-     * Init wrapper with original filter signature.
-     *
+     * @param InspectorWrapper $inspector
      * @param $hook_name
      * @param $callback_function
      * @param $priority
      * @param $accepted_args
-     * @return FilterWrapper
      */
-    public function init($hook_name, $callback_function, $priority, $accepted_args)
+    public function __construct(
+        $inspector,
+        $hook_name,
+        $callback_function,
+        $priority,
+        $accepted_args
+    )
     {
+        $this->inspector         = $inspector;
         $this->hook_name         = $hook_name;
         $this->priority          = $priority;
         $this->accepted_args     = $accepted_args;
         $this->callback_function = $callback_function;
 
-        return $this;
-    }
-
-    /**
-     * Execute wp filter inside inspector profiler.
-     */
-    public function run()
-    {
-        /**
-         * First we need to remove the existing hook, this will be replaced with an custom filter.
-         */
+        // First we need to remove the existing hook, this will be replaced with a custom filter.
         if ( ! remove_action( $this->hook_name, $this->callback_function, $this->priority ) ) {
-            echo "FAILED TO REMOVE FUNCTION";
+            error_log('INSPECTOR FAILED TO REMOVE FILTER FUNCTION');
         } else {
-            /**
-             * Add thhe new callback filter. This will be used as a wrapper calling the origin callback.
-             */
+            // Add the new callback filter. This will be used as a wrapper calling the origin callback.
             add_filter( $this->hook_name, array( $this, 'wrapper' ), $this->priority, $this->accepted_args );
         }
     }
@@ -109,58 +93,59 @@ class FilterWrapper
      * @return mixed|string
      */
     public function wrapper( ...$args ) {
-        $num_args   = count( $args );
-        $value      = '';
+        $value = '';
         $time_start = microtime( true );
 
         // Avoid the array_slice if possible.
         // we used the origin code from wordpress to ensure the same functionality.
         if ( $this->accepted_args == 0 ) {
             $value = call_user_func_array( $this->callback_function, array() );
-        } elseif ( $this->accepted_args >= $num_args ) {
+        } elseif ( $this->accepted_args >= count( $args ) ) {
             $value = @call_user_func_array( $this->callback_function, $args );
         } else {
             $value = call_user_func_array( $this->callback_function, array_slice( $args, 0, (int) $this->accepted_args ) );
         }
+
+        // Track time to execute origin function
         $time_end = microtime( true );
         $time     = $time_end - $time_start;
 
         // Load debug backtrace to get the file / folder
         $debug_stack = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS | DEBUG_BACKTRACE_PROVIDE_OBJECT );
 
-        /**
-         * loop through every stack to find the root of the filter|action.
-         */
+        // Loop through every stack to find the root of the filter|action.
         foreach ( $debug_stack as $stack ) {
             if ( isset( $stack['file'] ) && ( strpos( $stack['file'], 'themes' ) || strpos( $stack['file'], 'plugins' ) ) ) {
+                $this->generateSpan($stack, $time);
                 break;
             }
         }
-        if ( ! isset( $stack ) || ! isset( $stack['file'] ) ) {
-            return $value;
-        }
-
-        /**
-         * Add the time to the found plugin|theme. If not found we use the unknown keyword to track the time.
-         */
-        if ( strpos( $stack['file'], 'themes' ) ) {
-            // Theme functions
-            $span = new Span('Theme', $this->inspector->currentTransaction());
-            $span->start()->end($time);
-            SpanCollection::set('Theme', $span);
-        } else if ( strpos( $stack['file'], 'plugins' ) ) {
-            // Plugin functions
-            $pluginName = Helper::get_plugin_name($stack['file']);
-            $span = new Span($pluginName, $this->inspector->currentTransaction());
-            $span->start()->end($time);
-            SpanCollection::set($pluginName, $span);
-        } else {
-            // Wordpress Core functions
-            $span = new Span('WordPress Core', $this->inspector->currentTransaction());
-            $span->start()->end($time);
-            SpanCollection::set('themes', $span);
-        }
 
         return $value;
+    }
+
+    /**
+     * Add the time to the found plugin|theme. If not found we use the unknown keyword to track the time.
+     *
+     * @param $stack
+     * @param $time
+     */
+    public function generateSpan($stack, $time)
+    {
+        if ( strpos( $stack['file'], 'themes' ) ) {
+            // Theme functions
+            $type = 'Theme';
+        } else if ( strpos( $stack['file'], 'plugins' ) ) {
+            // Plugin functions
+            $type = Helper::get_plugin_name($stack['file']);
+        } else {
+            // Wordpress Core functions
+            $type = 'WordPress Core';
+        }
+
+        $span = new Span($type, $this->inspector->currentTransaction());
+        $span->start()->end($time);
+
+        SpanCollection::set($type, $span);
     }
 }

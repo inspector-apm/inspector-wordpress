@@ -30,3 +30,4 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'Inspector.php';
 require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'/Wordpress/Helper.php';
 require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'/Wordpress/SpanCollection.php';
 require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'/Wordpress/FilterWrapper.php';
+require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'/Wordpress/InspectorWrapper.php';
