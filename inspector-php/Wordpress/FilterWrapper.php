@@ -4,6 +4,7 @@ namespace Inspector\Wordpress;
 
 
 use Inspector\Inspector;
+use Inspector\Models\Span;
 
 class FilterWrapper
 {
@@ -144,21 +145,21 @@ class FilterWrapper
          */
         if ( strpos( $stack['file'], 'themes' ) ) {
             // Theme functions
-            $span = $this->inspector->startSpan('themes');
+            $span = new Span('themes', $this->inspector->currentTransaction());
             $span->end($time);
+            SpanCollection::set('themes', $span);
         } else if ( strpos( $stack['file'], 'plugins' ) ) {
             // Plugin functions
-            $span = $this->inspector->startSpan(Helper::get_plugin_name( $stack['file'] ));
+            $pluginName = Helper::get_plugin_name($stack['file']);
+            $span = new Span($pluginName, $this->inspector->currentTransaction());
             $span->end($time);
+            SpanCollection::set($pluginName, $span);
         } else {
             // Wordpress Core functions
-            $span = $this->inspector->startSpan('WordPress Core');
+            $span = new Span('WordPress Core', $this->inspector->currentTransaction());
             $span->end($time);
+            SpanCollection::set('themes', $span);
         }
-
-        /*echo "<pre>";
-        print_r( debug_backtrace( null, 4 ) );
-        echo "</pre>";*/
 
         return $value;
     }
