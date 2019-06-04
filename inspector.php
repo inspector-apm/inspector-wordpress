@@ -12,7 +12,7 @@
  *            Plugin Name: Inspector Real Time Monitoring
  *            Plugin URI: https://www.inspector.dev/
  *            Description: Real time monitoring for Web Agency and Freelance. Automate error detection so you can spend time on develop new functionality no needs to check manually that your website and applications works.
- *            Version: 1.0
+ *            Version: 1.0.0
  *            Author: Inspector
  *            Text Domain: inspector
  *            Contributors: Valerio Barbera
