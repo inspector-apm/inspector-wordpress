@@ -103,6 +103,8 @@ class InspectorWordpress
         add_action('after_setup_theme', array($this, 'endThemeSpan'));
         add_action('shutdown', array($this, 'shutdown'));*/
 
+        add_action('shutdown', array($this, 'shutdown'));
+
         global $wp_filter;
         foreach ( $wp_filter as $hook_name => $filter /* @var WP_Hook */ ) {
             foreach ( $filter->callbacks as $priority => $callback_container ) {
@@ -120,8 +122,6 @@ class InspectorWordpress
                 }
             }
         }
-
-        add_action('shutdown', array($this, 'shutdown'));
     }
 
     public function startTransaction()

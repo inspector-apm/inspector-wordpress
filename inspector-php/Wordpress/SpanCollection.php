@@ -32,6 +32,6 @@ class SpanCollection
             self::$collection[$key] = $span->end($total);
         }
 
-        self::$collection[] = [$key => $span];
+        self::$collection[$key] = $span;
     }
 }
