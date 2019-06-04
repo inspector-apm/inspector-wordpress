@@ -3,7 +3,7 @@ Contributors: Inspector
 Tags: Inspector Plugins, Real Time Monitoring, Error detection
 Requires at least: 4.5
 Tested up to: 5.1.0
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
  
@@ -59,5 +59,8 @@ for your users and which are hindering you.
  
 == Changelog ==
  
+= 1.1.0 =
+* Post data using wordpress http api
+
 = 1.0.0 =
-* Stable release
+* First Stable release
