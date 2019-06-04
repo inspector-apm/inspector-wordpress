@@ -20,9 +20,17 @@
  *            License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  */
 
+
 use Inspector\Configuration;
 use Inspector\Exceptions\InspectorException;
 use Inspector\Inspector;
+use Inspector\Wordpress\FilterWrapper;
+
+
+// Make sure it's wordpress
+if ( !defined( 'ABSPATH') ) {
+    die('Forbidden');
+}
 
 class Inspector_Wordpress
 {
@@ -40,53 +48,17 @@ class Inspector_Wordpress
     private $inspector;
 
     /**
-     * @var array
-     */
-    private $spans = [];
-
-    /**
      * Inspector_Wordpress constructor.
      */
     public function __construct()
     {
         if ($this->requireInspectorPackage()) {
             $this->initAgent();
+            $this->startTransaction();
+            $this->registerHooks();
         } else {
             error_log("Inspector Error: Couldn't activate Inspector Monitoring due to missing Inspector library!");
         }
-    }
-
-    /**
-     * Initialize Agent.
-     */
-    private function initAgent()
-    {
-        try {
-            $this->configuration = new Configuration(get_option( 'inspector_api_key' ));
-
-            $this->configuration->setEnabled(get_option( 'inspector_enable' ));
-
-            // Stop monitoring on admin panel
-            if(is_admin()){
-                $this->configuration->setEnabled(false);
-            }
-
-            $this->inspector = new Inspector($this->configuration);
-            $this->registerHooks();
-        } catch (InspectorException $exception) {
-            error_log('Inspector can not be activated. API KEY seems to be empty.');
-        }
-
-        // If handlers are not set, errors are still going to be reported
-        // to bugsnag, difference is execution will not stop.
-        //
-        // Can be useful to see inline errors and traces with xdebug too.
-        /*$set_error_and_exception_handlers = apply_filters('bugsnag_set_error_and_exception_handlers', true);
-        if ($set_error_and_exception_handlers === true) {
-            // Hook up automatic error handling
-            set_error_handler(array($this->client, "errorHandler"));
-            set_exception_handler(array($this->client, "exceptionHandler"));
-        }*/
     }
 
     /**
@@ -118,11 +90,59 @@ class Inspector_Wordpress
         return false;
     }
 
+    /**
+     * Initialize Agent.
+     */
+    private function initAgent()
+    {
+        try {
+            $this->configuration = new Configuration(get_option( 'inspector_api_key' ));
+
+            $this->configuration->setEnabled(get_option( 'inspector_enable' ));
+
+            // Stop monitoring on admin panel
+            if(is_admin()){
+                $this->configuration->setEnabled(false);
+            }
+
+            $this->inspector = new Inspector($this->configuration);
+        } catch (InspectorException $exception) {
+            error_log('Inspector can not be activated. API KEY seems to be empty.');
+        }
+
+        // If handlers are not set, errors are still going to be reported
+        // to Inspector, difference is execution will not stop.
+        //
+        // Can be useful to see inline errors and traces with xdebug too.
+        /*$set_error_and_exception_handlers = apply_filters('inspector_set_error_and_exception_handlers', true);
+        if ($set_error_and_exception_handlers === true) {
+            // Hook up automatic error handling
+            set_error_handler(array($this->client, "errorHandler"));
+            set_exception_handler(array($this->client, "exceptionHandler"));
+        }*/
+    }
+
     private function registerHooks()
     {
-        add_action('setup_theme', array($this, 'startTransaction'));
+        /*add_action('setup_theme', array($this, 'startTransaction'));
         add_action('after_setup_theme', array($this, 'endThemeSpan'));
-        add_action('shutdown', array($this, 'shutdown'));
+        add_action('shutdown', array($this, 'shutdown'));*/
+
+        global $wp_filter;
+        foreach ( $wp_filter as $hook_name => $filter /* @var WP_Hook */ ) {
+            foreach ( $filter->callbacks as $priority => $callback_container ) {
+                foreach ( $callback_container as $callback_name => $callback ) {
+
+                    if ( isset( $callback['function'] ) ) {
+                        $callback_function = $callback['function'];
+                    } else {
+                        $callback_function = $callback_name;
+                    }
+
+                    new FilterWrapper( $hook_name, $callback_function, $priority, $callback['accepted_args'] );
+                }
+            }
+        }
     }
 
     public function startTransaction()
@@ -134,33 +154,6 @@ class Inspector_Wordpress
         }
 
         $this->inspector->startTransaction($t_name);
-        $this->spans['theme'] = $this->inspector->startSpan('Theme');
-    }
-
-    public function endThemeSpan()
-    {
-        if(array_key_exists('theme', $this->spans)){
-            $this->spans['theme']->end();
-        }
-    }
-
-    public function shutdown($name)
-    {
-        $this->processQueries();
-    }
-
-    public function processQueries()
-    {
-        foreach ( $GLOBALS['wpdb'] as $name => $db ) {
-            if ( is_a( $db, 'wpdb' ) ) {
-                foreach ( (array) $db->queries as $query ) {
-                    $span = $this->inspector->startSpan($name);
-                    $span->getContext()->getDb()->setSql($query[0]);
-                    $span->getContext()->getDb()->setType('mysql');
-                    $span->end($query[1]);
-                }
-            }
-        }
     }
 
     protected function getTransactionNameFromRequest()
