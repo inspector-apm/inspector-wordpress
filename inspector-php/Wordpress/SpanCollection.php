@@ -4,8 +4,6 @@
 namespace Inspector\Wordpress;
 
 
-use Inspector\Models\Span;
-
 class SpanCollection
 {
     protected static $collection;
@@ -15,7 +13,7 @@ class SpanCollection
         return self::get();
     }
 
-    public static function get($key = null): Span
+    public static function get($key = null)
     {
         if (is_null($key)) {
             return self::$collection;
