@@ -15,7 +15,7 @@ class InspectorWrapper extends Inspector
      */
     public function flush()
     {
-        $this->addEntry(SpanCollection::all());
+        $this->addEntries(SpanCollection::all());
 
         parent::flush();
     }

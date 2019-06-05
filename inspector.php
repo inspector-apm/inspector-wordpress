@@ -44,16 +44,16 @@ function inspector_page(){
     require_once 'views/settings.php';
 }
 
-function inspector_profiler() {
-    require_once 'InspectorWordpress.php';
+function inspector_profiler_load() {
+    require_once 'InspectorLoader.php';
 
     add_action('admin_menu', 'inspector_add_menu');
 
     try {
-        new InspectorWordpress();
+        new InspectorLoader();
     } catch (\Exception $exception) {
         error_log('Inspector Error ' . $exception->getMessage());
     }
 }
 
-add_action( 'init', 'inspector_profiler' );
+add_action( 'init', 'inspector_profiler_load' );

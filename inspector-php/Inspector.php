@@ -122,7 +122,7 @@ class Inspector
      * @param array|AbstractModel $entries
      * @return Inspector
      */
-    public function addEntry($entries)
+    public function addEntries($entries)
     {
         $entries = is_array($entries) ? $entries : [$entries];
         foreach ($entries as $entry){

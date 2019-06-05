@@ -6,7 +6,7 @@ use Inspector\Exceptions\InspectorException;
 use Inspector\Wordpress\FilterWrapper;
 use Inspector\Wordpress\InspectorWrapper;
 
-class InspectorWordpress
+class InspectorLoader
 {
     private static $COMPOSER_AUTOLOADER = 'vendor/autoload.php';
     private static $PACKAGED_AUTOLOADER = 'inspector-php/autoload.php';
