@@ -37,6 +37,7 @@ function inspector_add_menu()
 function register_inspector_settings() {
     register_setting('inspector-settings', 'inspector_api_key');
     register_setting('inspector-settings', 'inspector_enable');
+    register_setting('inspector-settings', 'inspector_track_admin');
 }
 
 function inspector_page(){

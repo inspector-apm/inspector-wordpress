@@ -13,24 +13,32 @@ class FilterWrapper
     protected $inspector;
 
     /**
-     * @var string  This will be the hook we inject. Could either be an existing wordpress hook or alternative an
-     *              custom hook created by the plugin/theme.
+     * This will be the hook we inject. Could either be an existing wordpress hook or alternative an
+     * custom hook created by the plugin/theme.
+     *
+     * @var string
      */
     private $hook_name = '';
 
     /**
-     * @var string|array  The origin callback function which was implemented by the plugin|theme. it could either be
-     *                    a string or an array with the given object and method of the object.
+     * The origin callback function which was implemented by the plugin|theme. it could either be
+     * a string or an array with the given object and method of the object.
+     *
+     * @var string|array
      */
     private $callback_function = '';
 
     /**
-     * @var int the priority of the hook.
+     * The priority of the hook.
+     *
+     * @var int
      */
     private $priority = 10;
 
     /**
-     * @var int the number of arguments accepted by the hook.
+     * The number of arguments accepted by the hook.
+     *
+     * @var int
      */
     private $accepted_args = 0;
 
@@ -49,8 +57,7 @@ class FilterWrapper
         $callback_function,
         $priority,
         $accepted_args
-    )
-    {
+    ){
         $this->inspector         = $inspector;
         $this->hook_name         = $hook_name;
         $this->priority          = $priority;
@@ -70,7 +77,6 @@ class FilterWrapper
      * Magic _getter function provided by php
      *
      * @param string $property the property
-     *
      * @return null|mixed returns null if the property doesn't exist
      */
     public function __get( $property ) {
@@ -89,7 +95,6 @@ class FilterWrapper
      * it will add the time to the class.
      *
      * @param mixed ...$args
-     *
      * @return mixed|string
      */
     public function wrapper( ...$args ) {
@@ -127,7 +132,7 @@ class FilterWrapper
     }
 
     /**
-     * Add the time to the found plugin|theme. If not found we use the unknown keyword to track the time.
+     * Track plugin|theme function execution.
      *
      * @param $stack
      * @param $time

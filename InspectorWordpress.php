@@ -73,7 +73,7 @@ class InspectorWordpress
             $this->configuration->setEnabled(get_option( 'inspector_enable' ));
 
             // Stop monitoring on admin panel
-            if(is_admin()){
+            if(is_admin() && !get_option( 'inspector_track_admin' )){
                 $this->configuration->setEnabled(false);
             }
 
