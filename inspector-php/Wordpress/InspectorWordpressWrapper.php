@@ -6,7 +6,7 @@ namespace Inspector\Wordpress;
 
 use Inspector\Inspector;
 
-class InspectorWrapper extends Inspector
+class InspectorWordpressWrapper extends Inspector
 {
     /**
      * Flush data to the remote platform.
@@ -15,7 +15,7 @@ class InspectorWrapper extends Inspector
      */
     public function flush()
     {
-        $this->addEntries(SpanCollection::all());
+        $this->addEntries(SpanWordpressCollection::all());
 
         parent::flush();
     }

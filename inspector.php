@@ -43,7 +43,9 @@ function inspector_page(){
 }
 
 function inspector_profiler_load() {
-    require_once 'InspectorLoader.php';
+    require_once 'include/Helper.php';
+    require_once 'include/FilterWrapper.php';
+    require_once 'include/InspectorLoader.php';
 
     add_action('admin_menu', 'inspector_add_menu');
 

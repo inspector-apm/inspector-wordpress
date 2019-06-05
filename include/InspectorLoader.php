@@ -3,8 +3,7 @@
 
 use Inspector\Configuration;
 use Inspector\Exceptions\InspectorException;
-use Inspector\Wordpress\FilterWrapper;
-use Inspector\Wordpress\InspectorWrapper;
+use Inspector\Wordpress\InspectorWordpressWrapper;
 
 class InspectorLoader
 {
@@ -17,7 +16,7 @@ class InspectorLoader
     private $configuration;
 
     /**
-     * @var InspectorWrapper
+     * @var InspectorWordpressWrapper
      */
     private $inspector;
 
@@ -29,6 +28,7 @@ class InspectorLoader
         if ($this->requireInspectorPackage()) {
             $this->initAgent();
             $this->startTransaction();
+            //$this->wrapWordpressHooks();
         } else {
             error_log("Inspector Error: Couldn't activate Inspector Monitoring due to missing Inspector library!");
         }
@@ -42,19 +42,19 @@ class InspectorLoader
     private function requireInspectorPackage()
     {
         // inspector-php was already loaded by some 3rd-party code, don't need to load it again.
-        if (class_exists('InspectorWrapper')) {
+        if (class_exists('InspectorWordpressWrapper')) {
             return true;
         }
 
         // Try loading bugsnag-php with composer autoloader.
-        $composer_autoloader_path = dirname(__FILE__) . '/' . self::$COMPOSER_AUTOLOADER;
+        $composer_autoloader_path = dirname(__FILE__) . '/../' . self::$COMPOSER_AUTOLOADER;
         if (file_exists($composer_autoloader_path)) {
             require_once $composer_autoloader_path;
             return true;
         }
 
         // Try loading bugsnag-php from packaged autoloader.
-        $packaged_autoloader_path = dirname(__FILE__) . '/' . self::$PACKAGED_AUTOLOADER;
+        $packaged_autoloader_path = dirname(__FILE__) . '/../' . self::$PACKAGED_AUTOLOADER;
         if (file_exists($packaged_autoloader_path)) {
             require_once $packaged_autoloader_path;
             return true;
@@ -77,10 +77,9 @@ class InspectorLoader
                 $this->configuration->setEnabled(false);
             }
 
-            $this->inspector = new InspectorWrapper($this->configuration);
-            $this->registerHooks();
+            $this->inspector = new InspectorWordpressWrapper($this->configuration);
         } catch (InspectorException $exception) {
-            error_log('Inspector can not be activated. API KEY seems to be empty.');
+            error_log('Inspector can not be activated. API KEY could be empty.');
         }
 
         // If handlers are not set, errors are still going to be reported
@@ -95,7 +94,7 @@ class InspectorLoader
         }*/
     }
 
-    public function registerHooks()
+    public function wrapWordpressHooks()
     {
         /*add_action('setup_theme', array($this, 'startTransaction'));
         add_action('after_setup_theme', array($this, 'endThemeSpan'));
@@ -112,7 +111,14 @@ class InspectorLoader
                         $callback_function = $callback_name;
                     }
 
-                    //new FilterWrapper($this->inspector, $hook_name, $callback_function, $priority, $callback['accepted_args']);
+                    // Wrap hook with time tracking
+                    new FilterWrapper(
+                        $this->inspector->currentTransaction(),
+                        $hook_name,
+                        $callback_function,
+                        $priority,
+                        $callback['accepted_args']
+                    );
                 }
             }
         }
@@ -129,7 +135,7 @@ class InspectorLoader
         $this->inspector->startTransaction($t_name);
     }
 
-    protected function getTransactionNameFromRequest()
+    public function getTransactionNameFromRequest()
     {
         return strtoupper($_SERVER['REQUEST_METHOD']) . ' ' . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     }

@@ -1,7 +1,5 @@
 <?php
 
-namespace Inspector\Wordpress;
-
 class Helper
 {
     /**

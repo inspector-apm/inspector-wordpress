@@ -4,7 +4,7 @@
 namespace Inspector\Wordpress;
 
 
-class SpanCollection
+class SpanWordpressCollection
 {
     protected static $collection = [];
 
