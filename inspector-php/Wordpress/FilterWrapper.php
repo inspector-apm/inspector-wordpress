@@ -97,7 +97,7 @@ class FilterWrapper
         $time_start = microtime( true );
 
         // Avoid the array_slice if possible.
-        // we used the origin code from wordpress to ensure the same functionality.
+        // We execute the origin hook function to ensure the original functionality.
         if ( $this->accepted_args == 0 ) {
             $value = call_user_func_array( $this->callback_function, array() );
         } elseif ( $this->accepted_args >= count( $args ) ) {
@@ -106,11 +106,12 @@ class FilterWrapper
             $value = call_user_func_array( $this->callback_function, array_slice( $args, 0, (int) $this->accepted_args ) );
         }
 
-        // Track time to execute origin function
+        // Track how many time was needed to execute
         $time_end = microtime( true );
         $time     = $time_end - $time_start;
 
         // Load debug backtrace to get the file / folder
+        // useful to identify if function was called from theme/plugin/wordpress core
         $debug_stack = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS | DEBUG_BACKTRACE_PROVIDE_OBJECT );
 
         // Loop through every stack to find the root of the filter|action.
@@ -121,6 +122,7 @@ class FilterWrapper
             }
         }
 
+        // After tracking return the original value to preserve original functionality
         return $value;
     }
 
