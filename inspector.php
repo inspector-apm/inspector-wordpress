@@ -1,7 +1,5 @@
 <?php
 
-use Inspector\Wordpress\FilterWrapper;
-
 /**
  * Real time monitoring for Web Agency and Freelance. Automate error detection so you can spend time on develop new functionality no needs to check manually that your website and applications works.
  *
