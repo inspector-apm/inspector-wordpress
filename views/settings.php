@@ -51,8 +51,8 @@
                 <th scope="row">
                     <h4>Track Admin</h4>
                     <span style="color: #838383;">
-                        Activate monitoring also navigating
-                        the Wordpress admin panel.
+                        Activate monitoring also during
+                        use of administration panel.
                     </span>
                 </th>
                 <td>

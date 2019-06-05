@@ -112,7 +112,7 @@ class InspectorLoader
                         $callback_function = $callback_name;
                     }
 
-                    new FilterWrapper($this->inspector, $hook_name, $callback_function, $priority, $callback['accepted_args']);
+                    //new FilterWrapper($this->inspector, $hook_name, $callback_function, $priority, $callback['accepted_args']);
                 }
             }
         }
