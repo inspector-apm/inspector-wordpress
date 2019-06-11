@@ -13,7 +13,7 @@
  *            Plugin Name: Inspector Real Time Monitoring
  *            Plugin URI: https://www.inspector.dev/
  *            Description: Word Press Real time monitoring. Identify bad plugins and themes in real time.
- *            Version: 1.1.0
+ *            Version: 1.2.0
  *            Author: Inspector
  *            Text Domain: inspector
  *            Contributors: Valerio Barbera
