@@ -5,6 +5,7 @@ namespace Inspector;
 
 
 use Inspector\Contracts\TransportInterface;
+use Inspector\Models\AbstractModel;
 use Inspector\Models\Error;
 use Inspector\Models\Span;
 use Inspector\Models\Transaction;
@@ -41,7 +42,14 @@ class Inspector
      */
     public function __construct(Configuration $configuration)
     {
-        $this->transport = new CurlTransport($configuration);
+        switch ($configuration->getTransport()) {
+            case 'async':
+                $this->transport = new AsyncTransport($configuration);
+                break;
+            default:
+                $this->transport = new CurlTransport($configuration);
+        }
+
         $this->configuration = $configuration;
         register_shutdown_function(array($this, 'flush'));
     }
@@ -113,6 +121,21 @@ class Inspector
         $error->end();
 
         return $error;
+    }
+
+    /**
+     * Add an entry to the queue.
+     *
+     * @param array|AbstractModel $entries
+     * @return Inspector
+     */
+    public function addEntries($entries)
+    {
+        $entries = is_array($entries) ? $entries : [$entries];
+        foreach ($entries as $entry){
+            $this->transport->addEntry($entry);
+        }
+        return $this;
     }
 
     /**

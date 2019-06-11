@@ -27,3 +27,5 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'/Transport/AsyncTransport.ph
 require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'/Transport/CurlTransport.php';
 require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'Configuration.php';
 require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'Inspector.php';
+require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'/Wordpress/SpanWordpressCollection.php';
+require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'/Wordpress/InspectorWordpressWrapper.php';

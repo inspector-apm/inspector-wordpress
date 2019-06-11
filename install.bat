@@ -1,0 +1,1 @@
+robocopy C:\Users\Valerio\Documents\GitHub\inspector-wordpress C:\xampp\htdocs\wordpress\wp-content\plugins\inspector-wordpress /s /e

@@ -18,20 +18,6 @@ abstract class AbstractModel implements \JsonSerializable
      */
     protected $duration = 0.0;
 
-    /**
-     * PHP backtrace.
-     *
-     * @var array
-     */
-    protected $backtrace = [];
-
-    /**
-     * Limit the number of stack frames returned.
-     *
-     * @var int
-     */
-    protected $backtraceLimit = 0;
-
     public abstract function getContext();
 
     /**
@@ -42,15 +28,9 @@ abstract class AbstractModel implements \JsonSerializable
         return $this->timestamp;
     }
 
-    public function getBacktraceLimit(): int
+    public function getDuration(): float
     {
-        return $this->backtraceLimit;
-    }
-
-    public function setBacktraceLimit(int $backtraceLimit): AbstractModel
-    {
-        $this->backtraceLimit = $backtraceLimit;
-        return $this;
+        return $this->duration;
     }
 
     public function start(): AbstractModel
@@ -62,7 +42,6 @@ abstract class AbstractModel implements \JsonSerializable
     public function end($duration = null): AbstractModel
     {
         $this->duration = $duration ?? round((microtime(true) - $this->timestamp)*1000, 2); // milliseconds
-        $this->backtrace = debug_backtrace($this->backtraceLimit);
         return $this;
     }
 
