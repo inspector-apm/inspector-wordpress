@@ -3,7 +3,7 @@ Contributors: Inspector
 Tags: Inspector Real Time Monitoring, Inspector Plugins, Real Time Monitoring, Error detection
 Requires at least: 4.5
 Tested up to: 5.2.1
-Stable tag: 1.1.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
  
@@ -14,7 +14,7 @@ Inspector will inspect your site for speed, security and performance. Your WordP
 
 You can stay informed for potentially broken plugins or themes. Removing broken plugins is a big win in maintaining a high performance WordPress site.
 
-Inspector allows you to find out application drawback before they affect your users. It send you real-time alerts with complete diagnosis if something goes wrong in your website and keep your Wordpress under monitoring 24/7 so you are free to focus on grow your business avoiding tedious manual checks that your website is working properly.
+Inspector allows you to find out application drawback before they affect your users. Receive real-time alerts with complete diagnosis if something goes wrong in your website and keep your Wordpress under monitoring 24/7 so you are free to focus on grow your business avoiding tedious manual checks that your website is working properly.
 
 Sometimes could be a slow plugin or a page with broken address. You will be able to know what's impacting your customer journey and anticipate their needs in real time, 24/7.
 
@@ -41,7 +41,7 @@ It is simple, you just need to install this plugin. And safe because it is compl
  
 == Changelog ==
  
-= 1.2.0 =
+= 1.2.1 =
 * Segment timeline per wordpress components
 
 = 1.1.1 =
