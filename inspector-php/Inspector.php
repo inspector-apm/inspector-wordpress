@@ -9,6 +9,7 @@ use Inspector\Models\AbstractModel;
 use Inspector\Models\Error;
 use Inspector\Models\Span;
 use Inspector\Models\Transaction;
+use Inspector\Transport\AsyncTransport;
 use Inspector\Transport\CurlTransport;
 
 class Inspector
@@ -42,7 +43,14 @@ class Inspector
      */
     public function __construct(Configuration $configuration)
     {
-        $this->transport = new CurlTransport($configuration);
+        switch ($configuration->getTransport()) {
+            case 'async':
+                $this->transport = new AsyncTransport($configuration);
+                break;
+            default:
+                $this->transport = new CurlTransport($configuration);
+        }
+
         $this->configuration = $configuration;
         register_shutdown_function(array($this, 'flush'));
     }
