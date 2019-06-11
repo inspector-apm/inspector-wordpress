@@ -28,7 +28,7 @@ class InspectorLoader
         if ($this->requireInspectorPackage()) {
             $this->initAgent();
             $this->startTransaction();
-            //$this->wrapWordpressHooks();
+            $this->wrapWordpressHooks();
         } else {
             error_log("Inspector Error: Couldn't activate Inspector Monitoring due to missing Inspector library!");
         }
